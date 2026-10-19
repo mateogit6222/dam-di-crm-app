@@ -1,45 +1,87 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>DAM CRM - Gestión de Clientes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="goToGaleria()">
+        <ion-icon slot="icon-only" name="images-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
 
-  <!-- FORMULARIO REACTIVO (Visible para inserción o edición) -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ editingClienteId ? 'Editar Cliente' : 'Nuevo Cliente' }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form [formGroup]="clienteForm" (ngSubmit)="saveCliente()">
-        <ion-item>
-          <ion-label position="stacked">Nombre</ion-label>
-          <ion-input type="text" formControlName="nombre"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Ciudad</ion-label>
-          <ion-input type="text" formControlName="ciudad"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Fecha de Alta</ion-label>
-          <ion-input type="date" formControlName="fecha_alta"></ion-input>
-        </ion-item>
-        <div class="ion-margin-top">
-          <ion-button type="submit" expand="block" [disabled]="clienteForm.invalid">
-            {{ editingClienteId ? 'Actualizar' : 'Guardar' }}
-          </ion-button>
-          @if (editingClienteId) {
-            <ion-button type="button" fill="clear" expand="block" color="medium" (click)="resetForm()">
-              Cancelar
+  <!-- SECCIÓN DE LOGIN (Se muestra si NO hay usuario autenticado) -->
+  @if (!currentUser()) {
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Acceso de Usuario (Login)</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="login()">
+          <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input type="email" formControlName="email"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Contraseña</ion-label>
+            <ion-input type="password" formControlName="password"></ion-input>
+          </ion-item>
+          <div class="ion-margin-top">
+            <ion-button type="submit" expand="block" [disabled]="loginForm.invalid">
+              Iniciar Sesión
             </ion-button>
-          }
-        </div>
-      </form>
-    </ion-card-content>
-  </ion-card>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  } @else {
+    <!-- BARRA DE USUARIO LOGUEADO -->
+    <ion-item color="light" class="ion-margin-bottom">
+      <ion-label>
+        <p>Conectado como:</p>
+        <strong>{{ currentUser()?.email }}</strong>
+      </ion-label>
+      <ion-button slot="end" color="danger" size="small" (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
 
-  <!-- LISTADO DE CLIENTES -->
+    <!-- FORMULARIO CUD (Solo visible si está logueado) -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ editingClienteId ? 'Editar Cliente' : 'Nuevo Cliente' }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="clienteForm" (ngSubmit)="saveCliente()">
+          <ion-item>
+            <ion-label position="stacked">Nombre</ion-label>
+            <ion-input type="text" formControlName="nombre"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Ciudad</ion-label>
+            <ion-input type="text" formControlName="ciudad"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Fecha de Alta</ion-label>
+            <ion-input type="date" formControlName="fecha_alta"></ion-input>
+          </ion-item>
+          <div class="ion-margin-top">
+            <ion-button type="submit" expand="block" [disabled]="clienteForm.invalid">
+              {{ editingClienteId ? 'Actualizar' : 'Guardar' }}
+            </ion-button>
+            @if (editingClienteId) {
+              <ion-button type="button" fill="clear" expand="block" color="medium" (click)="resetForm()">
+                Cancelar
+              </ion-button>
+            }
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  <!-- LISTADO DE CLIENTES (Visible para todos) -->
   <h3>Listado de Clientes</h3>
   <ion-list>
     @for (cliente of clientes; track cliente.id) {
@@ -51,14 +93,17 @@
           </ion-label>
         </ion-item>
 
-        <ion-item-options side="end">
-          <ion-item-option color="primary" (click)="editCliente(cliente)">
-            <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-          </ion-item-option>
-          <ion-item-option color="danger" (click)="deleteCliente(cliente.id!)">
-            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
+        <!-- Opciones de CUD (Solo si está logueado) -->
+        @if (currentUser()) {
+          <ion-item-options side="end">
+            <ion-item-option color="primary" (click)="editCliente(cliente)">
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="deleteCliente(cliente.id!)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        }
       </ion-item-sliding>
     } @empty {
       <ion-item>

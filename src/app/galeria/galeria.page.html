@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Galería - Supabase Storage</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <h3>Imágenes del Bucket</h3>
+
+  @for (imageUrl of images; track imageUrl) {
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Fichero en Storage</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-img [src]="imageUrl" alt="Imagen de Supabase Storage"></ion-img>
+      </ion-card-content>
+    </ion-card>
+  } @empty {
+    <ion-item>
+      <ion-label color="medium">No hay imágenes en el bucket 'galeria'.</ion-label>
+    </ion-item>
+  }
+
+  <ion-toast [isOpen]="isToastOpen" [message]="toastMessage" duration="2000" (didDismiss)="isToastOpen = false">
+  </ion-toast>
+
+</ion-content>

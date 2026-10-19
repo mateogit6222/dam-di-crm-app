@@ -74,4 +74,34 @@ export class SupabaseService {
     const { error } = await this.supabase.from('clientes').delete().eq('id', id);
     if (error) throw error;
   }
+  
+  async logout() {
+  const { error } = await this.supabase.auth.signOut();
+  if (error) throw error;
+  this.currentUser.set(null);
+  this.userRole.set(null);
+}
+
+async getGaleriaImages(): Promise<string[]> {
+  const { data, error } = await this.supabase.storage.from('galeria').list('', {
+    limit: 100,
+    offset: 0,
+    sortBy: { column: 'name', order: 'asc' }
+  });
+  if (error) throw error;
+  
+  const imageUrls: string[] = [];
+  if (data) {
+    for (const file of data) {
+      if (file.name !== '.emptyFolderPlaceholder') {
+        const { data: publicUrlData } = this.supabase.storage
+          .from('galeria')
+          .getPublicUrl(file.name);
+        imageUrls.push(publicUrlData.publicUrl);
+      }
+    }
+  }
+  return imageUrls;
+}
+
 }
