@@ -1,20 +1,73 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>DAM CRM - Gestión de Clientes</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <!-- FORMULARIO REACTIVO (Visible para inserción o edición) -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ editingClienteId ? 'Editar Cliente' : 'Nuevo Cliente' }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="clienteForm" (ngSubmit)="saveCliente()">
+        <ion-item>
+          <ion-label position="stacked">Nombre</ion-label>
+          <ion-input type="text" formControlName="nombre"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Ciudad</ion-label>
+          <ion-input type="text" formControlName="ciudad"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Fecha de Alta</ion-label>
+          <ion-input type="date" formControlName="fecha_alta"></ion-input>
+        </ion-item>
+        <div class="ion-margin-top">
+          <ion-button type="submit" expand="block" [disabled]="clienteForm.invalid">
+            {{ editingClienteId ? 'Actualizar' : 'Guardar' }}
+          </ion-button>
+          @if (editingClienteId) {
+            <ion-button type="button" fill="clear" expand="block" color="medium" (click)="resetForm()">
+              Cancelar
+            </ion-button>
+          }
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- LISTADO DE CLIENTES -->
+  <h3>Listado de Clientes</h3>
+  <ion-list>
+    @for (cliente of clientes; track cliente.id) {
+      <ion-item-sliding>
+        <ion-item>
+          <ion-label>
+            <h2>{{ cliente.nombre }}</h2>
+            <p>Ciudad: {{ cliente.ciudad }} | Alta: {{ cliente.fecha_alta }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end">
+          <ion-item-option color="primary" (click)="editCliente(cliente)">
+            <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="deleteCliente(cliente.id!)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    } @empty {
+      <ion-item>
+        <ion-label color="medium">No hay clientes registrados.</ion-label>
+      </ion-item>
+    }
+  </ion-list>
+
+  <ion-toast [isOpen]="isToastOpen" [message]="toastMessage" duration="2000" (didDismiss)="setToastOpen(false)">
+  </ion-toast>
+
 </ion-content>
